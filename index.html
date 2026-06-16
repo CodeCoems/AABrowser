@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Web Browser</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            padding: 10px 15px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        button {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #e9e9e9;
+            border-color: #999;
+        }
+
+        button:active {
+            background: #ddd;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .url-bar {
+            flex: 1;
+            display: flex;
+            gap: 8px;
+        }
+
+        #urlInput {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+        }
+
+        #urlInput:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 4px rgba(76, 175, 80, 0.3);
+        }
+
+        .browser-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #browserFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            z-index: 1000;
+        }
+
+        .loading-spinner.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            display: none;
+            padding: 10px;
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef5350;
+            border-radius: 4px;
+            margin: 10px 15px;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <button id="backBtn" title="Go back">← Back</button>
+        <button id="forwardBtn" title="Go forward">Forward →</button>
+        <button id="reloadBtn" title="Reload page">⟳ Reload</button>
+        <button id="homeBtn" title="Go to Google">🏠 Home</button>
+        <div class="url-bar">
+            <input 
+                type="text" 
+                id="urlInput" 
+                placeholder="Enter URL (e.g., https://www.google.com)" 
+                autocomplete="off"
+            >
+            <button id="goBtn" title="Navigate to URL">Go</button>
+        </div>
+    </div>
+
+    <div class="error-message" id="errorMessage"></div>
+
+    <div class="browser-container">
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner"></div>
+        </div>
+        <iframe id="browserFrame" src="https://www.google.com/"></iframe>
+    </div>
+
+    <script>
+        const browserFrame = document.getElementById('browserFrame');
+        const urlInput = document.getElementById('urlInput');
+        const backBtn = document.getElementById('backBtn');
+        const forwardBtn = document.getElementById('forwardBtn');
+        const reloadBtn = document.getElementById('reloadBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const goBtn = document.getElementById('goBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Initialize with Google
+        urlInput.value = 'https://www.google.com/';
+
+        // Update URL bar when iframe loads
+        browserFrame.addEventListener('load', () => {
+            loadingSpinner.classList.remove('active');
+            errorMessage.classList.remove('show');
+            
+            try {
+                if (browserFrame.contentWindow.location.href !== 'about:blank') {
+                    urlInput.value = browserFrame.contentWindow.location.href;
+                }
+            } catch (e) {
+                // Cross-origin, can't access URL
+                urlInput.value = 'Unable to display URL (cross-origin)';
+            }
+        });
+
+        // Navigation functions
+        function navigateTo(url) {
+            if (!url.trim()) return;
+
+            let finalUrl = url.trim();
+
+            // Add protocol if missing
+            if (!finalUrl.match(/^https?:\/\//i) && !finalUrl.match(/^about:/)) {
+                finalUrl = 'https://' + finalUrl;
+            }
+
+            loadingSpinner.classList.add('active');
+            
+            try {
+                browserFrame.src = finalUrl;
+                urlInput.value = finalUrl;
+            } catch (e) {
+                showError('Failed to navigate: ' + e.message);
+            }
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            loadingSpinner.classList.remove('active');
+        }
+
+        // Button click handlers
+        backBtn.addEventListener('click', () => {
+            try {
+                browserFrame.contentWindow.history.back();
+            } catch (e) {
+                showError('Cannot go back (security restriction)');
+            }
+        });
+
+        forwardBtn.addEventListener('click', () => {
+            try {
+                browserFrame.contentWindow.history.forward();
+            } catch (e) {
+                showError('Cannot go forward (security restriction)');
+            }
+        });
+
+        reloadBtn.addEventListener('click', () => {
+            loadingSpinner.classList.add('active');
+            browserFrame.contentWindow.location.reload();
+        });
+
+        homeBtn.addEventListener('click', () => {
+            navigateTo('https://www.google.com/');
+        });
+
+        goBtn.addEventListener('click', () => {
+            navigateTo(urlInput.value);
+        });
+
+        // URL input enter key
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                navigateTo(urlInput.value);
+            }
+        });
+
+        // Show loading spinner on navigation
+        urlInput.addEventListener('focus', () => {
+            urlInput.select();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 'l' || e.key === 'L') {
+                    e.preventDefault();
+                    urlInput.focus();
+                    urlInput.select();
+                }
+                if (e.key === 'r' || e.key === 'R') {
+                    e.preventDefault();
+                    reloadBtn.click();
+                }
+            }
+            if (e.key === 'Escape') {
+                loadingSpinner.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
