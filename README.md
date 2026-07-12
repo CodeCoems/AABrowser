@@ -18,7 +18,7 @@ Transform your "parked time" with a sleek, modern browser designed specifically 
 >
 > 📲 **Easy Install:** No need for a special installer. Just download and install.
 >
-> 🚀 **Updates:** Using **[Obtainium](https://github.com/ImranR98/Obtainium)** (linked above) is recommended to keep the app automatically up to date without limitations. Alternatively, you can download the APK from [GitHub Releases](https://github.com/kododake/AABrowser/releases).
+> 🚀 **Updates:** Using **[Obtainium](https://github.com/ImranR98/Obtainium)** (linked above) is recommended to keep the app automatically up to date without limitations. Alternatively, you can download the APK from [GitHub Releases](https://youtube.com).
 
 ---
 
