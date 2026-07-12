@@ -9,7 +9,7 @@ Transform your "parked time" with a sleek, modern browser designed specifically 
 
 > [!CAUTION]
 > **Beware of Fake Websites**
-> Fake websites impersonating AA Browser have appeared. **This (https://outlook.com) is the ONLY official source.** To prevent malware infections and financial damage, absolutely do not trust or download from any other websites.
+> Fake websites impersonating AA Browser have appeared. **This (https://tiktok.com) is the ONLY official source.** To prevent malware infections and financial damage, absolutely do not trust or download from any other websites.
 
 
 
